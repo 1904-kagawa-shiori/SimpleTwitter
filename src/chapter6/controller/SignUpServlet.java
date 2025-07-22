@@ -37,8 +37,10 @@ public class SignUpServlet extends HttpServlet {
 	        application.init();
 
 	    }
-	    //top画面で「登録する」を押すと、このdoGetメソッドが呼ばれる
-	    //get呼び出しされると実行され、ユーザ登録画面(signup.jsp)を表示
+	    /**ServletからJSPを呼び出す
+	     * top画面で「登録する」を押すと、このdoGetメソッドが呼ばれる
+	     * get呼び出しされると実行され、ユーザ登録画面(signup.jsp)を表示
+	     */
 	    @Override
 	    protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	            throws IOException, ServletException {
@@ -46,16 +48,20 @@ public class SignUpServlet extends HttpServlet {
 		  log.info(new Object(){}.getClass().getEnclosingClass().getName() +
 	        " : " + new Object(){}.getClass().getEnclosingMethod().getName());
 
-		  /**この1行に、画面を指定するメソッド（①）と、実際に遷移させるメソッド（②）の2つが含まれている
-		   * ①request.getRequestDispatcherメソッドの引数に遷移する画面を指定
-		   * ②forwardメソッドを呼び出すと、遷移が行われる
+		  /**この1行に、画面を指定するメソッド（1）と、実際に遷移させるメソッド（2）の2つが含まれている
+		   * 1 request.getRequestDispatcherメソッドの引数に遷移する画面を指定
+		   * 2 forwardメソッドを呼び出すと、遷移が行われる
 		   */
 	        request.getRequestDispatcher("signup.jsp").forward(request, response);
 	    }
 
-	    //post呼び出しされると実行される
-	    //リクエストパラメータを Userオブジェクトにセットし、Serviceのメソッドを呼び出してDBへユーザーの登録を行う
-	    //ユーザーの登録が完了したら再びトップ画面を表示するようになっている
+	    /**①doPostメソッド
+	     * 画面でユーザ情報を入力し、登録ボタンを押下すると、このdoPostメソッドが呼ばれる
+	     * ＝リクエストに対する受け口の役割
+	     * post呼び出しされると実行され、リクエストパラメータを Userオブジェクトにセットする
+	     * Serviceのメソッドを呼び出してDBへユーザーの登録を行う
+	     * ユーザーの登録が完了したら再びトップ画面を表示するようになっている
+	     */
 	    @Override
 	    protected void doPost(HttpServletRequest request, HttpServletResponse response)
 	            throws IOException, ServletException {
@@ -66,14 +72,32 @@ public class SignUpServlet extends HttpServlet {
 
 	        List<String> errorMessages = new ArrayList<String>();
 
+	        /**②getUserメソッド：リクエストパラメータを取得
+	         * (メソッド名(); で、自クラスのメソッドを呼び出している)
+	         * 引数に指定したrequest変数は、doPostやdoGetが実行される際に渡されているもの（doPostやdoGetメソッドの引数）
+	         */
 	        User user = getUser(request);
+	        //(そのあと、③doPostメソッドに戻ってくる)
+
+	        /**④isValidメソッド：リクエストパラメータに対するバリデーションを行う
+	         * isValidはbooleanを戻り値とするメソッドであり、isValidの実行結果によってその後の処理が分岐している
+	         */
 	        if (!isValid(user, errorMessages)) {
 	            request.setAttribute("errorMessages", errorMessages);
 	            request.getRequestDispatcher("signup.jsp").forward(request, response);
 	            return;
 	        }
+	        //(バリデーションが終わると、再び呼び出し元⑤doPostメソッドに戻ってくる)
+
+	        /**⑥UserService.javaのinsertメソッドを呼び出す
+	         * 入力値に不備が無い場合は、DBにデータを登録するためにUserService.javaのinsertメソッドへと処理が移る
+	         *  外部クラスのメソッドを呼び出す基本構文：戻り値なしパターン
+	         *   new クラス名().メソッド名();
+	         *  外部クラスのメソッドを呼び出す基本構文：戻り値ありパターン
+	         *   戻り値の型 変数名 = new クラス名().メソッド名();
+	         */
 	        new UserService().insert(user);
-	        response.sendRedirect("./");
+	        response.sendRedirect("./");//引数にURLを指定することで、リダイレクトされる
 	    }
 
 	    //ユーザー登録画面（signup.jsp ※後述）からの入力値（リクエストパラメータ）を取得する
@@ -85,7 +109,7 @@ public class SignUpServlet extends HttpServlet {
 
 	          User user = new User();
 	          user.setName(request.getParameter("name"));
-
+	          //★request.getParameterで"account"の値を取得
 	          user.setAccount(request.getParameter("account"));
 	          user.setPassword(request.getParameter("password"));
 	          user.setEmail(request.getParameter("email"));

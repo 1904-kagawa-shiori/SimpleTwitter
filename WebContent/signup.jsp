@@ -7,6 +7,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<title>ユーザー登録</title>
+		<link href="./css/style.css" rel="stylesheet" type="text/css">
 	</head>
 	<body>
 		<div class="main-contents">
@@ -23,11 +24,13 @@
 			</c:if>
 
 			<!-- ユーザが入力するエリア。登録ボタンを押すと、入力値をパラメータとしてServletへ送信 -->
+			<!-- ①action属性で、呼び出すServletを指定 ②method属性で、呼び出すメソッド(doGetもしくはdoPost)を指定 -->
 			<form action="signup" method="post"><br />
 				<label for="name">名前</label><!--labelタグで、そのラベルがどの入力項目に対応したラベルなのかを示している-->
 				<input name="name" id="name" />（名前はあなたの公開プロフィールに表示されます）<br />
 
 				<label for="account">アカウント名</label>
+				<!-- ★"account"という名前(key)で入力値を送信している -->
 				<input name="account" id="account" /> <br />
 
 				<label for="password">パスワード</label>
