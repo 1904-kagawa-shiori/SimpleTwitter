@@ -124,10 +124,19 @@ public class SignUpServlet extends HttpServlet {
 	  	  log.info(new Object(){}.getClass().getEnclosingClass().getName() +
 	          " : " + new Object(){}.getClass().getEnclosingMethod().getName());
 
+	  	      //引数として渡された User オブジェクトから、登録しようとしているユーザー名・アカウント名...取得し、ローカル変数に格納
 	          String name = user.getName();
 	          String account = user.getAccount();
 	          String password = user.getPassword();
 	          String email = user.getEmail();
+
+		      /**実践課題3 アカウントの重複登録を防ぐため、登録前にDBに同じアカウントがないかチェックしにいく
+		       * insertする前にisValidメソッドの中のバリデーションでselect
+		       * まず、アカウント重複確認用のuser型変数を準備し、ユーザアカウント情報のselect結果を格納できるようにする
+		       * UserServiceクラスのインスタンスを作成し、selectメソッドを呼び出す
+		       * selectメソッドには、登録しようとしているユーザーアカウント名 (user.getAccount()) が引数として渡されている
+		       */
+	          User checkDuplicateAccounts = new UserService().select(user.getAccount());//selectの()の中身は account でもOK
 
 	          if (!StringUtils.isEmpty(name) && (20 < name.length())) {
 	              errorMessages.add("名前は20文字以下で入力してください");
@@ -137,6 +146,13 @@ public class SignUpServlet extends HttpServlet {
 	              errorMessages.add("アカウント名を入力してください");
 	          } else if (20 < account.length()) {
 	              errorMessages.add("アカウント名は20文字以下で入力してください");
+	          }
+
+	          /**実践課題3 アカウントの重複登録を防ぐため、登録前にDBに同じアカウントがないかチェックしにいく
+	           * checkDuplicateAccountsに該当ユーザアカウントが見つかれば格納されるため、これがnullでない場合はアカウント重複のエラーを出力する
+	           */
+	          if (checkDuplicateAccounts != null) {
+	        	  errorMessages.add("すでに存在するアカウントです");
 	          }
 
 	          if (StringUtils.isEmpty(password)) {

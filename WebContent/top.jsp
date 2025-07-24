@@ -30,7 +30,7 @@
 		<!-- 「loginUser｣が空でない場合にユーザー情報を表示させる -->
 		<c:if test="${ not empty loginUser }">
 			 <div class="profile">
-			 	<!-- 画面で、セッションに格納されたユーザ情報を参照して出力する -->>
+			 	<!-- 画面で、セッションに格納されたユーザ情報を参照して出力する -->
 				<div class="name"><h2><c:out value="${loginUser.name}" /></h2></div>
 				<div class="account">@<c:out value="${loginUser.account}" /></div>
 				<div class="description"><c:out value="${loginUser.description}" /></div>
@@ -64,12 +64,22 @@
 		<!-- メッセージを表示するためのコード -->
 		<div class="messages">
 			<c:forEach items="${messages}" var="message">
-				<div class="account-name">
-					<span class="account"><c:out value="${message.account}" /></span>
-					<span class="name"><c:out value="${message.name}" /></span>
-
-				<div class="text"><c:out value="${message.text}" /></div>
-				<div class="date"><fmt:formatDate value="${message.createdDate}" pattern="yyyy/MM/dd HH:mm:ss" /></div>
+				<div class="message">
+					<div class="account-name">
+						<!-- ユーザアカウント名のリンククリックで、各ユーザ毎のつぶやき表示画面へ遷移できるよう修正 -->
+						<!--リンクのURLを設定。 ./?user_id=　は現在のディレクトリを基準にuser_idというクエリパラメータを持つURLを指す -->
+						<!-- messageオブジェクトからuserIdプロパティの値を取得し、その値をURLのuser_idパラメータとして出力する -->
+						<!-- c:out valueの行：リンクの表示テキストを設定。messageオブジェクトからaccountプロパティの値を取得し、それをリンクとして表示する -->
+						<!-- 没コード→span class="account"><c:out value="${message.account}" /></span> -->
+						<span class="account">
+							<a href="./?user_id=<c:out value="${message.userId}"/> ">
+								<c:out value="${message.account}" />
+							</a>
+						</span>
+						<span class="name"><c:out value="${message.name}" /></span>
+					</div>
+					<div class="text"><c:out value="${message.text}" /></div>
+					<div class="date"><fmt:formatDate value="${message.createdDate}" pattern="yyyy/MM/dd HH:mm:ss" /></div>
 				</div>
 			</c:forEach>
 		</div>

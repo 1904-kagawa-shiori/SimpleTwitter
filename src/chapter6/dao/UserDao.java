@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.StringUtils;
+
 import chapter6.beans.User;
 import chapter6.exception.NoRowsUpdatedRuntimeException;
 import chapter6.exception.SQLRuntimeException;
@@ -170,7 +172,7 @@ public class UserDao {
 	    }
 	}
 
-	//更新用のメソッド
+	//ユーザ情報更新用のメソッド
 	public void update(Connection connection, User user) {
 
 	    log.info(new Object(){}.getClass().getEnclosingClass().getName() +
@@ -183,7 +185,11 @@ public class UserDao {
 	    	        sql.append("    account = ?, ");
 	    	        sql.append("    name = ?, ");
 	    	        sql.append("    email = ?, ");
-	    	        sql.append("    password = ?, ");
+	    	        //パスワードに入力がない場合、パスワードは更新しないので条件分岐処理を追加
+	    	        //パスワードがnull/空/空白文字　でない場合は、UPDATE文の更新対象にpasswordを含む
+	    	        if(!(StringUtils.isBlank(user.getPassword()))) {
+		    	        sql.append("    password = ?, ");
+	    	        }
 	    	        sql.append("    description = ?, ");
 	    	        sql.append("    updated_date = CURRENT_TIMESTAMP ");
 	    	        sql.append("WHERE id = ?");
@@ -193,9 +199,16 @@ public class UserDao {
 	    	        ps.setString(1, user.getAccount());
 	    	        ps.setString(2, user.getName());
 	    	        ps.setString(3, user.getEmail());
-	    	        ps.setString(4, user.getPassword());
-	    	        ps.setString(5, user.getDescription());
-	    	        ps.setInt(6, user.getId());
+	    	        //パスワードに入力がない場合、パスワードは更新しないので条件分岐処理を追加
+	    	        //パスワードがnull/空/空白文字　でない場合は、UPDATE文の更新対象にpasswordを含む
+	    	        if(!(StringUtils.isBlank(user.getPassword()))) {
+	    	        	ps.setString(4, user.getPassword());
+	    	        	ps.setString(5, user.getDescription());
+	    	        	ps.setInt(6, user.getId());
+	    	        } else {
+	    	        	ps.setString(4, user.getDescription());
+	    	        	ps.setInt(5, user.getId());
+	    	        }
 
 	    	        int count = ps.executeUpdate();
 	    	        if (count == 0) {
@@ -208,5 +221,35 @@ public class UserDao {
 	    	    } finally {
 	    	        close(ps);
 	    	    }
+	}
+
+	/* 実践課題3 アカウントの重複登録を防ぐため、登録前にDBに同じアカウントがないかチェックしにいく
+	 * String型のaccountを引数にもつ、selectメソッドを追加する
+	 */
+	public User select(Connection connection, String account) {
+
+		PreparedStatement ps = null;
+		try {
+			String sql = "SELECT * FROM users WHERE account = ?";
+
+			ps = connection.prepareStatement(sql);
+			ps.setString(1, account);
+
+			ResultSet rs = ps.executeQuery();
+
+			List<User> users = toUsers(rs);
+			if (users.isEmpty()) {
+				return null;
+			} else if (2 <= users.size()) {//2つ以上ユーザがいたらエラー
+				throw new IllegalStateException("ユーザーが重複しています");
+			} else {
+				return users.get(0);
+			}
+		} catch (SQLException e) {
+			throw new SQLRuntimeException(e);
+		} finally {
+			close(ps);
+		}
+
 	}
 }

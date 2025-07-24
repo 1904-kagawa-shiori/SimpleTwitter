@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.StringUtils;
+
 import chapter6.beans.User;
 import chapter6.dao.UserDao;
 import chapter6.logging.InitApplication;
@@ -114,7 +116,7 @@ public class UserService {
 	    }
 	}
 
-	//更新用のメソッド
+	//ユーザ情報更新用のメソッド
 	public void update(User user) {
 
 	    log.info(new Object(){}.getClass().getEnclosingClass().getName() +
@@ -123,8 +125,12 @@ public class UserService {
 	    Connection connection = null;
 	    try {
 	        // パスワード暗号化
-	        String encPassword = CipherUtil.encrypt(user.getPassword());
-	        user.setPassword(encPassword);
+	    	///パスワードに入力がない場合、パスワードは更新しないので条件分岐処理を追加
+	    	//パスワードがnull/空/空白文字　でない場合は、パスワードを暗号化する
+	    	if(!(StringUtils.isBlank(user.getPassword()))) {
+		        String encPassword = CipherUtil.encrypt(user.getPassword());
+		        user.setPassword(encPassword);
+	    	}
 
 	        connection = getConnection();
 	        new UserDao().update(connection, user);
@@ -141,4 +147,28 @@ public class UserService {
 	        close(connection);
 	    }
 	}
+
+	/* 実践課題3 アカウントの重複登録を防ぐため、登録前にDBに同じアカウントがないかチェックしにいく
+	 * String型の引数をもつ、selectメソッドを追加する
+	 */
+	public User select(String account) {
+
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			User user = new UserDao().select(connection, account);
+			commit(connection);
+
+			return user;
+		} catch (RuntimeException e){
+			rollback(connection);
+			throw e;
+		} catch (Error e) {
+			rollback(connection);
+			throw e;
+		} finally {
+			close(connection);
+		}
+	}
+
 }

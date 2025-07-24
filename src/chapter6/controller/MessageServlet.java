@@ -69,7 +69,8 @@ public class MessageServlet extends HttpServlet {
     	log.info(new Object(){}.getClass().getEnclosingClass().getName() +
     	" : " + new Object(){}.getClass().getEnclosingMethod().getName());
 
-    	if (StringUtils.isEmpty(text)) {
+    	//半角スペースが登録できてしまうため、StringUtils.isEmptyをStringUtils.isBlankに修正
+    	if (StringUtils.isBlank(text)) {
     		errorMessages.add("メッセージを入力してください");
     	} else if (140 < text.length()) {
     		errorMessages.add("140文字以下で入力してください");

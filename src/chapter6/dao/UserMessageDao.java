@@ -31,7 +31,8 @@ public class UserMessageDao {
         application.init();
     }
 
-    public List<UserMessage> select(Connection connection, int num) {
+    //つぶやき情報の取得(SELECT文)
+    public List<UserMessage> select(Connection connection, Integer id, int num) {
 
 	  log.info(new Object(){}.getClass().getEnclosingClass().getName() +
         " : " + new Object(){}.getClass().getEnclosingMethod().getName());
@@ -39,6 +40,7 @@ public class UserMessageDao {
         PreparedStatement ps = null;
         try {
             StringBuilder sql = new StringBuilder();
+
             sql.append("SELECT ");
             sql.append("    messages.id as id, ");
             sql.append("    messages.text as text, ");
@@ -49,10 +51,22 @@ public class UserMessageDao {
             sql.append("FROM messages ");
             sql.append("INNER JOIN users ");
             sql.append("ON messages.user_id = users.id ");
+            /**実践問題②
+            * idがnullだったら全件取得し、idがnull以外だったら、その値に対応するユーザーIDの投稿を取得するようにする
+            * WHERE句の条件にuser_idを指定する
+            */
+            if (id != null){
+            	sql.append("WHERE messages.user_id = ? ");
+            }
             sql.append("ORDER BY created_date DESC limit " + num);
 
             ps = connection.prepareStatement(sql.toString());
+            //実践問題②　idがnull以外だったら、psに1,userIdの値をセットする
+            if(id != null) {
+            	ps.setInt(1, id);
+            }
 
+            //DB→このDao
             ResultSet rs = ps.executeQuery();
 
             List<UserMessage> messages = toUserMessages(rs);
@@ -64,8 +78,8 @@ public class UserMessageDao {
             close(ps);
         }
     }
-    private List<UserMessage> toUserMessages(ResultSet rs) throws SQLException {
 
+    private List<UserMessage> toUserMessages(ResultSet rs) throws SQLException {
 
   	  log.info(new Object(){}.getClass().getEnclosingClass().getName() +
           " : " + new Object(){}.getClass().getEnclosingMethod().getName());

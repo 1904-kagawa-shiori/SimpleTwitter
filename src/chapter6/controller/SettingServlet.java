@@ -112,8 +112,16 @@ public class SettingServlet extends HttpServlet {
 
         String name = user.getName();
         String account = user.getAccount();
-        String password = user.getPassword();
+        //String password = user.getPassword();
         String email = user.getEmail();
+
+        /**実践課題3 アカウントの重複登録を防ぐため、登録前にDBに同じアカウントがないかチェックしにいく
+	     * updateする前にisValidメソッドの中のバリデーションでselect
+	     * まず、アカウント重複確認用のuser型変数を準備し、ユーザアカウント情報のselect結果を格納できるようにする
+	     * UserServiceクラスのインスタンスを作成し、selectメソッドを呼び出す
+	     * selectメソッドには、登録しようとしているユーザーアカウント名 (user.getAccount()) が引数として渡されている
+	     */
+        User checkDuplicateAccounts = new UserService().select(user.getAccount());//selectの()の中身は account でもOK
 
         if (!StringUtils.isEmpty(name) && (20 < name.length())) {
             errorMessages.add("名前は20文字以下で入力してください");
@@ -123,9 +131,23 @@ public class SettingServlet extends HttpServlet {
         } else if (20 < account.length()) {
             errorMessages.add("アカウント名は20文字以下で入力してください");
         }
-        if (StringUtils.isEmpty(password)) {
-            errorMessages.add("パスワードを入力してください");
+
+        /**実践課題3 アカウントの重複登録を防ぐため、登録前にDBに同じアカウントがないかチェックしにいく
+         * ①checkDuplicateAccountsに該当ユーザアカウントが見つかれば格納されるため、これがnullでない場合はアカウント重複のエラーを出力する
+         * ②検索して見つかったアカウントのIDが、現在設定を更新しようとしているユーザー自身のIDと異なることをチェックする★
+         * ★なぜ必要？
+         * ユーザーが自分のアカウント名を変更しないまま設定保存しようとした場合、
+         * 当然checkDuplicateAccountsでそのユーザ自身のアカウントをDBから見つけて返すことになる。(checkDuplicateAccountsはnullじゃない状態)
+         * もしcheckDuplicateAccounts.getId() != user.getId()のチェックがなければ、「自分自身のアカウント名が重複している」という誤ったエラーになるため
+         */
+        if (checkDuplicateAccounts != null && checkDuplicateAccounts.getId() != user.getId()) {
+        	errorMessages.add("すでに存在するアカウントです");
         }
+
+        //パスワードに入力がない場合はエラーメッセージを表示させないようにした
+        //if (StringUtils.isEmpty(password)) {
+        //    errorMessages.add("パスワードを入力してください");
+        //}
         if (!StringUtils.isEmpty(email) && (50 < email.length())) {
             errorMessages.add("メールアドレスは50文字以下で入力してください");
         }

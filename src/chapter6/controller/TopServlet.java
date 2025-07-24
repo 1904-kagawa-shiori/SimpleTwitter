@@ -53,8 +53,16 @@ public class TopServlet extends HttpServlet {
     		isShowMessageForm = true;
     	}
 
+    	/* 実戦問題②：ユーザーアカウント名にリンクを設定し、クリックすると各ユーザー毎のつぶやき表示画面へ遷移させるようにする
+    	 * String型のuser_idの値をrequest.getParameter("user_id")で
+    	 * JSPから受け取るように設定
+    	 * MessageServiceのselectに引数としてString型のuser_idを追加
+    	 */
+    	String userId = request.getParameter("user_id");
+
     	//メッセージを格納するためのリスト
-    	List<UserMessage> messages = new MessageService().select();
+    	List<UserMessage> messages = new MessageService().select(userId);
+    	//List<UserMessage> messages = new MessageService().select();
 
     	request.setAttribute("messages", messages);
     	request.setAttribute("isShowMessageForm", isShowMessageForm);
