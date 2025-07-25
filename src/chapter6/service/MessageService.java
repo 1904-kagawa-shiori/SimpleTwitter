@@ -35,7 +35,7 @@ public class MessageService {
     public void insert(Message message) {
 
   	  log.info(new Object(){}.getClass().getEnclosingClass().getName() +
-  	        " : " + new Object(){}.getClass().getEnclosingMethod().getName());
+  	  " : " + new Object(){}.getClass().getEnclosingMethod().getName());
 
   	        Connection connection = null;
   	        try {
@@ -44,15 +44,36 @@ public class MessageService {
   	            commit(connection);
   	        } catch (RuntimeException e) {
   	            rollback(connection);
-  			log.log(Level.SEVERE, new Object(){}.getClass().getEnclosingClass().getName() + " : " + e.toString(), e);
+  	            log.log(Level.SEVERE, new Object(){}.getClass().getEnclosingClass().getName() + " : " + e.toString(), e);
   	            throw e;
   	        } catch (Error e) {
   	            rollback(connection);
-  			log.log(Level.SEVERE, new Object(){}.getClass().getEnclosingClass().getName() + " : " + e.toString(), e);
+  			    log.log(Level.SEVERE, new Object(){}.getClass().getEnclosingClass().getName() + " : " + e.toString(), e);
   	            throw e;
   	        } finally {
   	            close(connection);
   	        }
+
+    }
+
+    //つぶやきの削除
+    public void delete(int id) {
+
+    	log.info(new Object(){}.getClass().getEnclosingClass().getName() +
+    	" : " + new Object(){}.getClass().getEnclosingMethod().getName());
+
+    	Connection connection = null;
+    	try {
+    		connection = getConnection();
+    		new MessageDao().delete(connection, id);
+    		commit(connection);
+    	} catch (RuntimeException e) {
+    		rollback(connection);
+    		log.log(Level.SEVERE, new Object(){}.getClass().getEnclosingClass().getName() + " : " + e.toString(), e);
+    		throw e;
+    	} finally {
+    		close(connection);
+    	}
 
     }
 
@@ -100,5 +121,6 @@ public class MessageService {
     		close(connection);
     	}
     }
+
 
 }

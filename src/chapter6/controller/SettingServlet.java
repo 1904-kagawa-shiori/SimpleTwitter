@@ -39,6 +39,7 @@ public class SettingServlet extends HttpServlet {
 
     }
 
+    //編集画面を表示させるためのdoGet
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

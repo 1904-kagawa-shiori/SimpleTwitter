@@ -50,16 +50,44 @@ public class MessageDao {
             sql.append(")");
 
             ps = connection.prepareStatement(sql.toString());
-
+            //上記SQL文の、?の部分(=プレースホルダ)に具体的な値を埋め込む
+            //1:一番目のプレースホルダ
+            //2:二番目のプレースホルダ
             ps.setInt(1, message.getUserId());
             ps.setString(2, message.getText());
 
             ps.executeUpdate();
         } catch (SQLException e) {
-		log.log(Level.SEVERE, new Object(){}.getClass().getEnclosingClass().getName() + " : " + e.toString(), e);
+        	log.log(Level.SEVERE, new Object(){}.getClass().getEnclosingClass().getName() + " : " + e.toString(), e);
             throw new SQLRuntimeException(e);
         } finally {
             close(ps);
         }
    }
+
+    //つぶやきの削除用
+	public void delete(Connection connection, int id) {
+
+		log.info(new Object(){}.getClass().getEnclosingClass().getName() +
+		" : " + new Object(){}.getClass().getEnclosingMethod().getName());
+
+		PreparedStatement ps = null;
+		try {
+			StringBuilder sql = new StringBuilder();
+			sql.append("DELETE FROM messages ");
+			sql.append("WHERE id = ? ");
+
+			ps = connection.prepareStatement(sql.toString());
+			//プレースホルダにidを埋め込む
+			ps.setInt(1, id);
+
+			ps.executeUpdate();
+
+		} catch (SQLException e) {
+			log.log(Level.SEVERE, new Object(){}.getClass().getEnclosingClass().getName() + " : " + e.toString(), e);
+			throw new SQLRuntimeException(e);
+		} finally {
+			close(ps);
+		}
+	}
 }
