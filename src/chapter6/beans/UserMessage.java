@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 //表示するメッセージ(ビュー)に対応するBean
+//つぶやきの表示＝usersテーブルとmessagesテーブルから取得＝UserMessageクラス（UserMessage.java）で扱う
 public class UserMessage implements Serializable {
 
 	private int id;

@@ -19,7 +19,7 @@ import chapter6.exception.NoRowsUpdatedRuntimeException;
 import chapter6.logging.InitApplication;
 import chapter6.service.UserService;
 
-//編集画面のServlet
+//ユーザ情報編集画面のServlet
 @WebServlet(urlPatterns = { "/setting" })
 
 public class SettingServlet extends HttpServlet {
@@ -39,7 +39,7 @@ public class SettingServlet extends HttpServlet {
 
     }
 
-    //編集画面を表示させるためのdoGet
+    //ユーザ情報編集画面を表示させるためのdoGet
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -56,7 +56,7 @@ public class SettingServlet extends HttpServlet {
         request.getRequestDispatcher("setting.jsp").forward(request, response);
     }
 
-    //編集画面の編集内容を反映させるためのdoPost
+    //ユーザ情報編集画面の編集内容を反映させるためのdoPost
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

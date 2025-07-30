@@ -33,7 +33,7 @@
 			 	<!-- 画面で、セッションに格納されたユーザ情報を参照して出力する -->
 				<div class="name"><h2><c:out value="${loginUser.name}" /></h2></div>
 				<div class="account">@<c:out value="${loginUser.account}" /></div>
-				<div class="description"><c:out value="${loginUser.description}" /></div>
+				<div class="description"><pre><c:out value="${loginUser.description}" /></pre></div>
 			</div>
 		</c:if>
 
@@ -56,12 +56,12 @@
 				 	いま、どうしてる？<br />
 				 	<textarea name="text" cols="100" rows="5" class="tweet-box"></textarea>
 					<br />
-					<input type="submit" value="つぶやく">（140文字まで）
+					<input type="submit" value="つぶやく">（140文字まで）<br/>
 				</form>
 			 </c:if>
 		</div>
 
-		<!-- メッセージを表示するためのコード -->
+		<!-- つぶやきを表示するためのコード -->
 		<div class="messages">
 			<c:forEach items="${messages}" var="message">
 				<div class="message">
@@ -78,16 +78,43 @@
 						</span>
 						<span class="name"><c:out value="${message.name}" /></span>
 					</div>
-					<div class="text"><c:out value="${message.text}" /></div>
-					<div class="date"><fmt:formatDate value="${message.createdDate}" pattern="yyyy/MM/dd HH:mm:ss" /></div>
-					<!-- つぶやきの削除 -->
-					<div class="delete-button">
-						<form action="deleteMessage" method="post">
-							<input type="hidden" name="messageId" value="${message.id}">
-							<!-- ボタン -->
-							<input type="submit" value="削除"/>
-						</form>
+					<div class="text">
+						<pre><c:out value="${message.text}" /></pre>
 					</div>
+					<div class="date"><fmt:formatDate value="${message.createdDate}" pattern="yyyy/MM/dd HH:mm:ss" /></div>
+					<!--ログインユーザと対象メッセージユーザが一緒の場合、つぶやきの編集と削除を可能にする-->
+					<c:if test="${loginUser.id == message.userId}">
+						<!-- つぶやきの編集 -->
+						<div class="edit-button">
+							<form action="edit" method="get"><!--actionにはurlPatternsで設定したのと同じくeditを指定する必要がある -->
+								<input type="hidden" name="messageId" value="${message.id}">
+								<!-- ボタン -->
+								<input type="submit" value="編集" />
+							</form>
+						</div>
+						<!-- つぶやきの削除 -->
+						<div class="delete-button">
+							<form action="deleteMessage" method="post">
+								<input type="hidden" name="messageId" value="${message.id}">
+								<!-- ボタン -->
+								<input type="submit" value="削除"/><br/>
+							</form>
+						</div>
+					</c:if>
+				</div>
+				<!--つぶやきへの返信-->
+				<div class="comment">
+					<c:if test="${ not empty loginUser }">
+						<form action="comment" method="post">
+							返信<br />
+							<!--紐づいているつぶやきのIDをServletに送る-->
+							<input type="hidden" name="messageId" value="${message.id}">
+							<textarea name="text" cols="100" rows="5" class="tweet-box"></textarea>
+							<!--返信ボタン-->
+							<input type="submit" value="返信">（140文字まで）<br/>
+						</form>
+					</c:if>
+					<br/>
 				</div>
 			</c:forEach>
 		</div>

@@ -3,6 +3,7 @@ package chapter6.beans;
 import java.io.Serializable;
 import java.util.Date;
 
+//つぶやきメッセージ情報を扱うbean
 public class Message implements Serializable {
 
     private int id;

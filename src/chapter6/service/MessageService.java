@@ -32,6 +32,7 @@ public class MessageService {
         application.init();
     }
 
+    //新規つぶやき
     public void insert(Message message) {
 
   	  log.info(new Object(){}.getClass().getEnclosingClass().getName() +
@@ -77,6 +78,48 @@ public class MessageService {
 
     }
 
+    //つぶやきの編集画面表示
+	public Message select(int id) {
+
+		log.info(new Object(){}.getClass().getEnclosingClass().getName() +
+		" : " + new Object(){}.getClass().getEnclosingMethod().getName());
+
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			Message message = new MessageDao().select(connection, id);
+			commit(connection);
+			//戻り値にmessageを指定
+			return message;
+		} catch (RuntimeException e) {
+			rollback(connection);
+			log.log(Level.SEVERE, new Object(){}.getClass().getEnclosingClass().getName() + " : " + e.toString(), e);
+			throw e;
+		} finally {
+			close(connection);
+		}
+	}
+
+	//つぶやきの編集
+	public void update(Message message) {
+
+		log.info(new Object(){}.getClass().getEnclosingClass().getName() +
+		" : " + new Object(){}.getClass().getEnclosingMethod().getName());
+
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			new MessageDao().update(connection, message);
+			commit(connection);
+		} catch(RuntimeException e) {
+			rollback(connection);
+			log.log(Level.SEVERE, new Object(){}.getClass().getEnclosingClass().getName() + " : " + e.toString(), e);
+			throw e;
+		} finally {
+			close(connection);
+		}
+	}
+
     /* 実戦問題②：ユーザーアカウント名にリンクを設定し、クリックすると各ユーザー毎のつぶやき表示画面へ遷移させるようにする
      * selectの引数にString型のuserIdを追加
      */
@@ -121,6 +164,8 @@ public class MessageService {
     		close(connection);
     	}
     }
+
+
 
 
 }
