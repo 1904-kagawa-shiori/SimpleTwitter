@@ -101,6 +101,7 @@ public class MessageDao {
 
 		PreparedStatement ps = null;//DBに送る命令を準備するための箱
 		try {
+
 			String sql = "SELECT * FROM messages WHERE id = ?";
 			//DBへの命令を準備 (psにSQL文をセット)
 			ps = connection.prepareStatement(sql);

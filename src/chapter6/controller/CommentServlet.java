@@ -19,7 +19,7 @@ import chapter6.beans.User;
 import chapter6.logging.InitApplication;
 import chapter6.service.CommentService;
 
-//commentに対応するServlet
+//commentに対応するServlet(JSPのフォームの action 属性と紐づく)
 @WebServlet(urlPatterns = { "/comment" })
 
 public class CommentServlet extends HttpServlet {
@@ -51,22 +51,32 @@ public class CommentServlet extends HttpServlet {
 		String text = request.getParameter("text");
 		//isValidがfalseを返したら、エラーメッセージを表示しつつTOP画面を表示させる
 		if (!isValid(text, errorMessages)) {
+			//sessionにエラーメッセージを入れる（JSPで表示するため）
 			session.setAttribute("errorMessages", errorMessages);
+			// トップ画面（"./"）にリダイレクトして、エラーメッセージを表示させる
 			response.sendRedirect("./");
 			return;
 		}
 
+		//Commentオブジェクト（返信の情報を保持する箱）を作成
 		Comment comment = new Comment();
-		//つぶやきへの返信を、commentにセットする
+		//ユーザが入力したつぶやきへの返信を、commentにセットする
 		comment.setText(text);
-		//メッセージIDもセット
-		comment.setMessage_id("message_Id");
-		System.out.println(comment.getMessage_id());
-		//ログインユーザのセッション取得
-		User user = (User) session.getAttribute("loginUser");
-		//ユーザIDのセット必要！
-		comment.setUser_id(user.getId());
+		/**メッセージIDもセット
+		 * どの「つぶやき」に対する返信なのか、そのメッセージIDを受け取り、Commentオブジェクトにセットする
+		 * 隠しフィールド <input type="hidden" name="messageId" value="${message.id}"> から取得
+		 */
+		comment.setMessage_id(Integer.parseInt(request.getParameter("messageId")));
 
+		/**ログインユーザのセッション取得(誰が返信したのかの情報)して、Commentオブジェクトにセット
+		 * ログイン時にセッションに保存しておいたユーザー情報（Userオブジェクト）を取り出す
+		 */
+		User user = (User) session.getAttribute("loginUser");
+		comment.setUser_id(user.getId());//ログインユーザのIDのセット必要！
+
+		/**CommentServiceクラスを使って、
+		 * 作成したCommentオブジェクトの情報をDBに挿入（保存）する
+		 */
 		new CommentService().insert(comment);
 		response.sendRedirect("./");
 	}

@@ -12,7 +12,7 @@
 	<body>
 		<div class="main-contents">
 
-			<c:if test="${ not empty errorMessages }">
+			<c:if test="${not empty errorMessages}">
 				<div class="errorMessages">
 					<ul>
 						<c:forEach items="${errorMessages}" var="errorMessage">
@@ -20,6 +20,8 @@
 						</c:forEach>
 					</ul>
 				</div>
+				<!-- エラーメッセージがユーザーに表示された後、不要になった時点でセッションから削除する処理 -->
+				<c:remove var="errorMessages" scope="session" />
 			</c:if>
 
 			<form action="login" method="post"><br />

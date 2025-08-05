@@ -4,6 +4,9 @@ import static chapter6.utils.CloseableUtil.*;
 import static chapter6.utils.DBUtil.*;
 
 import java.sql.Connection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -123,7 +126,7 @@ public class MessageService {
     /* 実戦問題②：ユーザーアカウント名にリンクを設定し、クリックすると各ユーザー毎のつぶやき表示画面へ遷移させるようにする
      * selectの引数にString型のuserIdを追加
      */
-    public List<UserMessage> select(String userId) {
+    public List<UserMessage> select(String userId, String startDate, String endDate) {
 
     	log.info(new Object(){}.getClass().getEnclosingClass().getName() +
     			" : " + new Object(){}.getClass().getEnclosingMethod().getName());
@@ -143,12 +146,48 @@ public class MessageService {
     		if(!StringUtils.isEmpty(userId)) {
     			id = Integer.parseInt(userId);
     		}
+
+    		//startが入力されていたら、開始時刻を00:00:00にセット
+    		if(!StringUtils.isBlank(startDate)) {
+    			startDate += " 00:00:00";
+    		} else {
+    			//デフォルト値を設定
+    			startDate = "2020/01/01 00:00:00";
+    		}
+    		//endが入力されていたら、終了時刻を23:59:59にセット
+    		if(!StringUtils.isBlank(endDate)) {
+    			endDate += " 23:59:59";
+    		} else {
+    			//デフォルト値を設定
+    			//Date型のdateクラス
+    			Date date = new Date();
+    			//日時フォーマット：SimpleDateFormat、DateTimeFormatter(Java8以降でつかえる 試したけど使えなさげ)など色々ある
+    			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    			//終了日について、SimpleDateFormatクラスを用いて指定したフォーマットで、日付を代入
+    			endDate = dateFormat.format(date);
+    		}
+    		/* Java8以降、java.timeパッケージを使う方法
+    		 * import java.time.LocalDate;
+    		 * import java.time.LocalDateTime;
+    		 * import java.time.format.DateTimeFormatter;
+    		 * // ユーザーが日付を入力しなかった場合のデフォルト値
+    		 * if (StringUtils.isBlank(endDate)) {
+    		 * // 現在の日付と時刻を取得
+    		 * LocalDateTime now = LocalDateTime.now();
+    		 * // フォーマッターを定義
+    		 * DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+    		 * // 現在の日付と時刻を指定したフォーマットで文字列に変換
+    		 * endDate = now.format(formatter);
+}
+    		 */
+
     		/*
     		 * messageDao.selectに引数としてInteger型のidを追加
     		 * idがnullだったら全件取得する
     		 * idがnull以外だったら、その値に対応するユーザーIDの投稿を取得する
+    		 * つぶやきの絞り込み機能追加にて、引数にstartDate,endDateを追加
     		 */
-    		List<UserMessage> messages = new UserMessageDao().select(connection, id, LIMIT_NUM);
+    		List<UserMessage> messages = new UserMessageDao().select(connection, id, startDate, endDate, LIMIT_NUM);
     		commit(connection);
 
     		return messages;
@@ -164,8 +203,5 @@ public class MessageService {
     		close(connection);
     	}
     }
-
-
-
 
 }

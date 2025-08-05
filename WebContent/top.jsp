@@ -26,9 +26,19 @@
 				<a href="logout">ログアウト</a>
 			</c:if>
 		</div>
+		<!--日付の絞り込み-->
+		<div class="filter-by-date">
+			<form action="./" method="get">
+				<span>日付</span>
+				<input type="date" name="startDate" value="${startDate}"> ～
+				<input type="date" name="endDate" value="${endDate}">
+				<input type="submit" value="絞り込み">
+			</form>
+		</div>
+
 		<!-- ログインユーザ情報を表示させるための処理 -->
 		<!-- 「loginUser｣が空でない場合にユーザー情報を表示させる -->
-		<c:if test="${ not empty loginUser }">
+		<c:if test="${not empty loginUser}">
 			 <div class="profile">
 			 	<!-- 画面で、セッションに格納されたユーザ情報を参照して出力する -->
 				<div class="name"><h2><c:out value="${loginUser.name}" /></h2></div>
@@ -38,11 +48,11 @@
 		</c:if>
 
 		<!-- テキストエリアとサブミット用のボタンを追加 -->
-		<c:if test="${ not empty errorMessages }">
+		<c:if test="${not empty errorMessages}">
 			<div class="errorMessages">
 				<ul>
 					<c:forEach items="${errorMessages}" var="errorMessage">
-						<li><c:out value="${errorMessage}" />
+						<li><c:out value="${errorMessage}" /></li>
 					</c:forEach>
 				</ul>
 			</div>
@@ -61,9 +71,10 @@
 			 </c:if>
 		</div>
 
-		<!-- つぶやきを表示するためのコード -->
+		<!-- つぶやき、つぶやきへの返信を表示する -->
 		<div class="messages">
 			<c:forEach items="${messages}" var="message">
+				<!-- つぶやきを表示するためのコード -->
 				<div class="message">
 					<div class="account-name">
 						<!-- ユーザアカウント名のリンククリックで、各ユーザ毎のつぶやき表示画面へ遷移できるよう修正 -->
@@ -102,13 +113,32 @@
 						</div>
 					</c:if>
 				</div>
+				<!-- つぶやきの返信を表示するためのコード -->
+				<c:forEach items="${comments}" var="comment">
+					<!-- つぶやきの返信のmessageIdと、つぶやきのidが一緒の場合、コメント表示 -->
+					<c:if test="${comment.messageId == message.id}">
+						<div class="comments">
+							<div class="account-name">
+								<span class="account"><c:out value="${comment.account}" /></span>
+								<span class="name"><c:out value="${comment.name}" /></span>
+							</div>
+							<div class="text">
+								<pre><c:out value="${comment.text}" /></pre>
+							</div>
+							<div class="date">
+								<fmt:formatDate value="${comment.createdDate}" pattern="yyyy/MM/dd HH:mm:ss" />
+							</div>
+						</div>
+					</c:if>
+				</c:forEach>
 				<!--つぶやきへの返信-->
-				<div class="comment">
+				<div class="comment-form-area">
 					<c:if test="${ not empty loginUser }">
 						<form action="comment" method="post">
 							返信<br />
 							<!--紐づいているつぶやきのIDをServletに送る-->
 							<input type="hidden" name="messageId" value="${message.id}">
+							<!-- name属性の値(text)が、servlet側で request.getParameter()の()内で取得する値に対応する  -->
 							<textarea name="text" cols="100" rows="5" class="tweet-box"></textarea>
 							<!--返信ボタン-->
 							<input type="submit" value="返信">（140文字まで）<br/>
@@ -118,7 +148,6 @@
 				</div>
 			</c:forEach>
 		</div>
-
 		<div class="copyright"> Copyright(c)kagawa.shiori</div>
 	</div>
 </body>

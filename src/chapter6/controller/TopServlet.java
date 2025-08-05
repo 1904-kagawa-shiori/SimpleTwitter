@@ -11,8 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import chapter6.beans.User;
+import chapter6.beans.UserComment;
 import chapter6.beans.UserMessage;
 import chapter6.logging.InitApplication;
+import chapter6.service.CommentService;
 import chapter6.service.MessageService;
 
 //トップ画面のServlet
@@ -60,11 +62,31 @@ public class TopServlet extends HttpServlet {
     	 */
     	String userId = request.getParameter("user_id");
 
-    	//メッセージを格納するためのリスト
-    	List<UserMessage> messages = new MessageService().select(userId);
-    	//List<UserMessage> messages = new MessageService().select();
+//    	//ユーザIDがnull,空文字,空白文字でないか＆数字で入っているか確認
+//    	Integer id = null;
+//    	if(!StringUtils.isBlank(userId) && userId.matches("^[0-9]*$")) {
+//    		id = Integer.parseInt(userId);
+//    	}
 
+    	//開始日時、終了日時をJSPから受け取る
+    	String startDate = request.getParameter("startDate");
+    	String endDate = request.getParameter("endDate");
+
+    	//つぶやきを格納するためのリスト
+    	List<UserMessage> messages = new MessageService().select(userId, startDate, endDate);
+
+    	//つぶやきの返信を格納するためのリスト
+    	List<UserComment> comments = new CommentService().select();
+
+    	//つぶやきの絞り込みの開始日時、終了日時をセットする※これしないと絞り込んだ時に日付の値保持されない
+    	request.setAttribute("startDate", startDate);
+    	request.setAttribute("endDate", endDate);
+
+    	//つぶやきをセット
     	request.setAttribute("messages", messages);
+    	//つぶやきの返信をセット
+    	request.setAttribute("comments", comments);
+
     	request.setAttribute("isShowMessageForm", isShowMessageForm);
         request.getRequestDispatcher("/top.jsp").forward(request, response);
     }

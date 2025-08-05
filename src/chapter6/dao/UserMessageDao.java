@@ -32,7 +32,7 @@ public class UserMessageDao {
     }
 
     //つぶやき情報の取得(SELECT文)
-    public List<UserMessage> select(Connection connection, Integer id, int num) {
+    public List<UserMessage> select(Connection connection, Integer id, String startDate, String endDate, int num) {
 
 	  log.info(new Object(){}.getClass().getEnclosingClass().getName() +
         " : " + new Object(){}.getClass().getEnclosingMethod().getName());
@@ -51,19 +51,31 @@ public class UserMessageDao {
             sql.append("FROM messages ");
             sql.append("INNER JOIN users ");
             sql.append("ON messages.user_id = users.id ");
+            /**つぶやきの絞り込み機能追加で以下を追加
+             * 開始日時～終了日時を指定
+             */
+            sql.append("WHERE messages.created_date ");
+            sql.append("BETWEEN ? and ? ");
+
             /**実践問題②
             * idがnullだったら全件取得し、idがnull以外だったら、その値に対応するユーザーIDの投稿を取得するようにする
-            * WHERE句の条件にuser_idを指定する
+            * WHERE句の条件にuser_idを指定する※つぶやきの絞り込み機能追加時に、冒頭をWHEREでなく、ANDに修正済み
             */
             if (id != null){
-            	sql.append("WHERE messages.user_id = ? ");
+            	sql.append("AND messages.user_id = ? ");
             }
             sql.append("ORDER BY created_date DESC limit " + num);
 
             ps = connection.prepareStatement(sql.toString());
+
+            //つぶやきの絞り込み機能追加で以下を追加
+            //各デフォルト値の変数　開始時刻:startDate、終了時刻:endDate　デフォルト値の準備はService側でやる
+            ps.setString(1, startDate);
+            ps.setString(2, endDate);
+
             //実践問題②　idがnull以外だったら、psに1,userIdの値をセットする
             if(id != null) {
-            	ps.setInt(1, id);
+            	ps.setInt(3, id);
             }
 
             //DB→このDao
@@ -72,7 +84,7 @@ public class UserMessageDao {
             List<UserMessage> messages = toUserMessages(rs);
             return messages;
         } catch (SQLException e) {
-		log.log(Level.SEVERE, new Object(){}.getClass().getEnclosingClass().getName() + " : " + e.toString(), e);
+        	log.log(Level.SEVERE, new Object(){}.getClass().getEnclosingClass().getName() + " : " + e.toString(), e);
             throw new SQLRuntimeException(e);
         } finally {
             close(ps);
